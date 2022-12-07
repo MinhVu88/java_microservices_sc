@@ -1,3 +1,10 @@
+/* What is an Aggregate?
+  - An Aggregate is an entity or a group of entities that's always kept in a consistent state.
+  - The Aggregate Root is an entity responsible for maintaining
+    this consistent state within the Aggregate.
+  - This makes the Aggregate the primary building block for
+    implementing a command model in any CQRS-based application
+*/
 package com.techbank.cqrs.core.domain;
 
 import com.techbank.cqrs.core.events.BaseEvent;
@@ -12,7 +19,10 @@ public abstract class AggregateRoot {
 	protected String id;
 	private int version = -1;
 
+	// this contains all the changes made to the Aggregate in the form of events
 	private final List<BaseEvent> changes = new ArrayList<>();
+
+	// this logs exceptions to the Spring container
 	private final Logger logger = Logger.getLogger(AggregateRoot.class.getName());
 
 	public String getId() {
@@ -36,6 +46,7 @@ public abstract class AggregateRoot {
 	}
 
 	public void markChangesAsCommitted() {
+		// the changes list gets emptied to make sure that subsequent events added to the list are new ones
 		this.changes.clear();
 	}
 
