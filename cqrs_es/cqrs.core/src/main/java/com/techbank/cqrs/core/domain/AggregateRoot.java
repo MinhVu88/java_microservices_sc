@@ -1,7 +1,18 @@
 /* What is an Aggregate?
   - An Aggregate is an entity or a group of entities that's always kept in a consistent state.
-  - The Aggregate Root is an entity responsible for maintaining
+
+  - The Aggregate Root (AR) is an entity responsible for maintaining
     this consistent state within the Aggregate.
+
+  - The AR maintains a list of uncommitted changes in the form of events that
+    needs to be applied to the Aggregate & be persisted to the event store.
+
+  - The AR contains a method that can be invoked to commit
+    changes which have been applied to the Aggregate.
+
+  - The AR manages which apply method (account.cmd.domain.AccountAggregate)
+    is invoked on the Aggregate, based on the event type.
+
   - This makes the Aggregate the primary building block for
     implementing a command model in any CQRS-based application
 */
@@ -52,6 +63,7 @@ public abstract class AggregateRoot {
 
 	protected void applyChange(BaseEvent event, Boolean isNewEvent) {
 		try {
+			// Java Reflection: getClass()
 			var method = getClass().getDeclaredMethod("apply", event.getClass());
 
 			method.setAccessible(true);
@@ -79,6 +91,7 @@ public abstract class AggregateRoot {
 	}
 
 	public void replayEvents(Iterable<BaseEvent> events) {
+		// events that aren't new will be used to recreate the state of the Aggregate
 		events.forEach(event -> applyChange(event, false));
 	}
 }
