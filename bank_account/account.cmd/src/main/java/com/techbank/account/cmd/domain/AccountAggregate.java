@@ -15,8 +15,11 @@ public class AccountAggregate extends AggregateRoot {
 	private Boolean active;
 	private double balance;
 
+	// This constructor method handles the AccountOpenedEvent event via the OpenAccountCommand command.
+	// A command that "creates" an Aggregate instance should always be handled in an Aggregate constructor like this one.
 	public AccountAggregate(OpenAccountCommand command) {
 		raiseEvent(
+			// build() returns a constructed AccountOpenedEvent instance
 			AccountOpenedEvent.builder()
 				.id(command.getId())
 				.accountHolder(command.getAccountHolder())
@@ -27,15 +30,18 @@ public class AccountAggregate extends AggregateRoot {
 		);
 	}
 
+	// apply() applies the AccountOpenedEvent event to the Aggregate
 	public void apply(AccountOpenedEvent event) {
 		this.id = event.getId();
 		this.active = true;
+
+		// set the existing balance to the newly created account's initial balance
 		this.balance = event.getOpeningBalance();
 	}
 
 	public void depositFunds(double amount) {
 		if(!this.active) {
-			throw new IllegalStateException("funds can't be deposited into a closed account");
+			throw new IllegalStateException("funds can't be deposited into a closed bank account");
 		}
 
 		if(amount <= 0) {
@@ -52,12 +58,14 @@ public class AccountAggregate extends AggregateRoot {
 
 	public void apply(FundsDepositedEvent event) {
 		this.id = event.getId();
+
+		// add the deposited amount to the existing balance
 		this.balance += event.getAmount();
 	}
 
 	public void withdrawFunds(double amount) {
 		if(!this.active) {
-			throw new IllegalStateException("funds can't be withdrawn from a closed account");
+			throw new IllegalStateException("funds can't be withdrawn from a closed bank account");
 		}
 
 		raiseEvent(
@@ -70,6 +78,8 @@ public class AccountAggregate extends AggregateRoot {
 
 	public void apply(FundsWithdrawnEvent event) {
 		this.id = event.getId();
+
+		// subtract the withdrawn amount from the existing balance
 		this.balance -= event.getAmount();
 	}
 
