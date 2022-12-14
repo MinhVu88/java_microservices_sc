@@ -15,6 +15,10 @@ public class AccountAggregate extends AggregateRoot {
 	private Boolean active;
 	private double balance;
 
+	public double getBalance() {
+		return balance;
+	}
+
 	// This constructor method handles the AccountOpenedEvent event via the OpenAccountCommand command.
 	// A command that "creates" an Aggregate instance should always be handled in an Aggregate constructor like this one.
 	public AccountAggregate(OpenAccountCommand command) {
